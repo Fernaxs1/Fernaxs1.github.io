@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo de Humedad para Riego - Antofagasta</title>
+    <style>
+        :root {
+            --verde-riego: #2ecc71;    /* Ideal para riego */
+            --amarillo-riego: #f39c12;  /* Aceptable para riego */
+            --rojo-riego: #e74c3c;     /* No regar */
+            --azul-oscuro: #005792;
+            --blanco: #FFFFFF;
+            --gris: #f5f5f5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--gris);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--azul-oscuro), #0077b6);
+            color: var(--blanco);
+            padding: 2rem;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--blanco);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .humedad-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            transition: color 0.5s ease;
+        }
+        
+        .btn-verificar {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin: 1rem 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-verificar:hover {
+            background-color: #003d66;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .alert-box {
+            background-color: var(--blanco);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.4s ease;
+            border-top: 6px solid var(--azul-oscuro);
+        }
+        
+        .riego-ideal {
+            border-top-color: var(--verde-riego);
+        }
+        
+        .riego-aceptable {
+            border-top-color: var(--amarillo-riego);
+        }
+        
+        .no-regar {
+            border-top-color: var(--rojo-riego);
+        }
+        
+        .alert-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .riego-ideal .alert-title {
+            color: var(--verde-riego);
+        }
+        
+        .riego-aceptable .alert-title {
+            color: var(--amarillo-riego);
+        }
+        
+        .no-regar .alert-title {
+            color: var(--rojo-riego);
+        }
+        
+        .alert-message {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .alert-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .recomendacion-riego {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #ddd;
+        }
+        
+        .btn-cerrar {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        
+        .btn-cerrar:hover {
+            background-color: #003d66;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .info-adicional {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sistema de Riego Inteligente</h1>
+        <p>Antofagasta, Chile</p>
+    </div>
+    
+    <div class="container">
+        <h2>Monitoreo de Humedad para Riego</h2>
+        <p>Verifica si las condiciones actuales son adecuadas para regar</p>
+        
+        <div class="humedad-display" id="humedad-display">--%</div>
+        
+        <button class="btn-verificar" onclick="verificarHumedad()">
+            Verificar Condiciones de Riego
+        </button>
+        
+        <div class="info-adicional">
+            <p>Última verificación: <span id="last-update">--</span></p>
+        </div>
+    </div>
+    
+    <div class="alert-overlay" id="alert-overlay">
+        <div class="alert-box" id="alert-box">
+            <div class="alert-icon" id="alert-icon">🌱</div>
+            <div class="alert-title" id="alert-title">Estado para Riego</div>
+            <div class="alert-message" id="alert-message"></div>
+            <div class="recomendacion-riego" id="recomendacion-riego"></div>
+            <button class="btn-cerrar" onclick="cerrarAlerta()">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        // API Key de OpenWeatherMap (reemplaza con tu propia API key)
+        const apiKey = '3d8b309701a13f65b660fa2c64cdc517'; // Ejemplo educativo
+        const ciudad = 'Antofagasta,CL';
+        
+        // Rangos de humedad para riego (adaptados para clima desértico costero)
+        const RANGOS_RIEGO = {
+            IDEAL: { min: 30, max: 50, color: '#2ecc71', icon: '💧' },       // Riego recomendado
+            ACEPTABLE: { min: 20, max: 65, color: '#f39c12', icon: '⚠️' },  // Riego con precaución
+            NO_REGAR: { color: '#e74c3c', icon: '🚫' }                      // No regar
+        };
+        
+        // Elementos del DOM
+        const elementos = {
+            humedadDisplay: document.getElementById('humedad-display'),
+            lastUpdate: document.getElementById('last-update'),
+            alertOverlay: document.getElementById('alert-overlay'),
+            alertBox: document.getElementById('alert-box'),
+            alertIcon: document.getElementById('alert-icon'),
+            alertTitle: document.getElementById('alert-title'),
+            alertMessage: document.getElementById('alert-message'),
+            recomendacionRiego: document.getElementById('recomendacion-riego')
+        };
+        
+        // Función principal para verificar humedad
+        async function verificarHumedad() {
+            try {
+                // Mostrar estado de carga
+                elementos.humedadDisplay.textContent = '...';
+                elementos.lastUpdate.textContent = 'Analizando condiciones...';
+                
+                // Obtener datos meteorológicos
+                const respuesta = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&appid=${apiKey}&units=metric&lang=es`
+                );
+                
+                if (!respuesta.ok) {
+                    throw new Error('Error al conectar con el servicio meteorológico');
+                }
+                
+                const datos = await respuesta.json();
+                const humedad = datos.main.humidity;
+                const fechaActualizacion = new Date().toLocaleString('es-CL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Actualizar la interfaz
+                elementos.humedadDisplay.textContent = `${humedad}%`;
+                elementos.humedadDisplay.style.color = determinarColorRiego(humedad);
+                elementos.lastUpdate.textContent = fechaActualizacion;
+                
+                // Mostrar alerta con recomendación de riego
+                mostrarAlertaRiego(humedad, datos.weather[0].description);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                elementos.humedadDisplay.textContent = 'Error';
+                elementos.lastUpdate.textContent = `Error: ${error.message}`;
+                
+                // Mostrar alerta de error
+                elementos.alertBox.className = 'alert-box';
+                elementos.alertIcon.textContent = '❌';
+                elementos.alertTitle.textContent = "Error";
+                elementos.alertMessage.textContent = "No se pudieron obtener los datos de humedad.";
+                elementos.recomendacionRiego.textContent = error.message;
+                elementos.alertOverlay.style.display = 'flex';
+            }
+        }
+        
+        // Determinar el color según la humedad para riego
+        function determinarColorRiego(humedad) {
+            if (humedad >= RANGOS_RIEGO.IDEAL.min && humedad <= RANGOS_RIEGO.IDEAL.max) {
+                return RANGOS_RIEGO.IDEAL.color;
+            } else if (humedad >= RANGOS_RIEGO.ACEPTABLE.min && humedad <= RANGOS_RIEGO.ACEPTABLE.max) {
+                return RANGOS_RIEGO.ACEPTABLE.color;
+            } else {
+                return RANGOS_RIEGO.NO_REGAR.color;
+            }
+        }
+        
+        // Mostrar alerta con recomendación de riego
+        function mostrarAlertaRiego(humedad, descripcionClima) {
+            let estadoRiego, recomendacion, icono;
+            
+            if (humedad >= RANGOS_RIEGO.IDEAL.min && humedad <= RANGOS_RIEGO.IDEAL.max) {
+                estadoRiego = "IDEAL PARA RIEGO";
+                recomendacion = "Las condiciones son perfectas para regar. La humedad del suelo se encuentra en niveles óptimos para la absorción por las plantas.";
+                icono = RANGOS_RIEGO.IDEAL.icon;
+                elementos.alertBox.className = 'alert-box riego-ideal';
+            } 
+            else if (humedad >= RANGOS_RIEGO.ACEPTABLE.min && humedad <= RANGOS_RIEGO.ACEPTABLE.max) {
+                estadoRiego = "ACEPTABLE PARA RIEGO";
+                recomendacion = humedad > RANGOS_RIEGO.IDEAL.max 
+                    ? "La humedad es algo elevada. Riegue con moderación o espere unas horas."
+                    : "La humedad es algo baja. Puede regar pero con mayor cantidad de agua.";
+                icono = RANGOS_RIEGO.ACEPTABLE.icon;
+                elementos.alertBox.className = 'alert-box riego-aceptable';
+            } 
+            else {
+                estadoRiego = "NO REGAR";
+                recomendacion = humedad > RANGOS_RIEGO.ACEPTABLE.max
+                    ? "La humedad es demasiado alta. Regar ahora podría dañar las plantas por exceso de agua."
+                    : "La humedad es extremadamente baja. Espere a temperaturas más frescas para regar (amanecer o atardecer).";
+                icono = RANGOS_RIEGO.NO_REGAR.icon;
+                elementos.alertBox.className = 'alert-box no-regar';
+            }
+            
+            // Configurar la alerta
+            elementos.alertIcon.textContent = icono;
+            elementos.alertTitle.textContent = estadoRiego;
+            elementos.alertMessage.innerHTML = `
+                <strong>Humedad actual:</strong> ${humedad}%<br>
+                <strong>Condiciones:</strong> ${descripcionClima}
+            `;
+            
+            elementos.recomendacionRiego.innerHTML = `
+                <strong>Recomendación:</strong> ${recomendacion}<br><br>
+                ${obtenerConsejoAdicional(humedad)}
+            `;
+            
+            elementos.alertOverlay.style.display = 'flex';
+        }
+        
+        // Consejos adicionales según la humedad
+        function obtenerConsejoAdicional(humedad) {
+            const ahora = new Date();
+            const hora = ahora.getHours();
+            let consejo = "";
+            
+            if (humedad < 20) {
+                consejo = "💡 En condiciones extremadamente secas, considere riego por goteo para maximizar eficiencia.";
+            } 
+            else if (humedad > 65) {
+                consejo = "💡 Revise el drenaje del suelo para evitar encharcamientos que dañen las raíces.";
+            }
+            
+            // Añadir consejo sobre horario de riego
+            if (hora >= 10 && hora <= 17 && (humedad < 50 || humedad > 65)) {
+                consejo += " ⏳ Evite regar en horas de máximo calor para reducir evaporación.";
+            }
+            
+            return consejo;
+        }
+        
+        // Cerrar la alerta
+        function cerrarAlerta() {
+            elementos.alertOverlay.style.display = 'none';
+        }
+        
+        // Inicializar (opcional)
+        // document.addEventListener('DOMContentLoaded', verificarHumedad);
+    </script>
+</body>
+</html>
