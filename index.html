@@ -32,25 +32,58 @@
         .header {
             background: linear-gradient(135deg, var(--azul-oscuro), #0077b6);
             color: var(--blanco);
-            padding: 2rem;
+            padding: 1rem;
             text-align: center;
             width: 100%;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .responsive-icon {
+            width: min(70vw, 200px); /* Ajuste responsivo */
+            height: auto;
+            max-width: 100%;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         .container {
             max-width: 800px;
             width: 90%;
-            margin: 2rem auto;
-            padding: 2rem;
+            margin: 1rem auto;
+            padding: 1.5rem;
             background-color: var(--blanco);
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
+            box-sizing: border-box;
         }
         
         .humedad-display {
-            font-size: 5rem;
+            font-size: clamp(3rem, 12vw, 5rem);
             font-weight: bold;
             margin: 1rem 0;
             transition: color 0.5s ease;
@@ -61,13 +94,15 @@
             color: var(--blanco);
             border: none;
             padding: 1rem 2rem;
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 4vw, 1.2rem);
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
             margin: 1rem 0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 350px;
         }
         
         .btn-verificar:hover {
@@ -91,7 +126,7 @@
         
         .alert-box {
             background-color: var(--blanco);
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 15px;
             max-width: 500px;
             width: 90%;
@@ -114,7 +149,7 @@
         }
         
         .alert-title {
-            font-size: 1.8rem;
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
             margin-bottom: 1rem;
             font-weight: bold;
         }
@@ -134,11 +169,11 @@
         .alert-message {
             margin-bottom: 1.5rem;
             line-height: 1.6;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
         }
         
         .alert-icon {
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3rem);
             margin-bottom: 1rem;
         }
         
@@ -148,6 +183,7 @@
             border-radius: 8px;
             margin: 1rem 0;
             border-left: 4px solid #ddd;
+            font-size: clamp(0.85rem, 3.5vw, 1rem);
         }
         
         .btn-cerrar {
@@ -155,12 +191,14 @@
             color: var(--blanco);
             border: none;
             padding: 0.8rem 1.8rem;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 4vw, 1rem);
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
             margin-top: 1rem;
+            width: 100%;
+            max-width: 200px;
         }
         
         .btn-cerrar:hover {
@@ -173,28 +211,58 @@
         }
         
         .info-adicional {
-            margin-top: 2rem;
-            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
             color: #666;
         }
-        .responsive-heading {
-            display: flex;
-            align-items: center;
-            gap: 1rem; /* Espacio relativo */
-            font-size: clamp(1.5rem, 4vw, 2.5rem); /* Texto adaptable */
+        
+        h2 {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            margin: 0.5rem 0;
         }
-    
-        .responsive-icon {
-            width: clamp(250px, 10vw, 500px); /* Ancho adaptable */
-            height: auto; /* Proporción automática */
+        
+        p {
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            margin: 0.5rem 0;
+        }
+
+        /* Media queries para dispositivos pequeños */
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.8rem;
+            }
+            
+            .container {
+                padding: 1.2rem;
+                margin: 0.8rem auto;
+                width: 95%;
+            }
+            
+            .btn-verificar {
+                padding: 0.9rem;
+            }
+            
+            .alert-box {
+                padding: 1.2rem;
+            }
+            
+            .recomendacion-riego {
+                padding: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <img src="Imagen_de_WhatsApp_2025-06-23_a_las_23.54.13_c30eb867-removebg-preview.png" alt="Logo" class="responsive-icon">
-        <p>Antofagasta, Chile</p>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="Imagen_de_WhatsApp_2025-06-23_a_las_23.54.13_c30eb867-removebg-preview.png" alt="Logo Monitoreo de Humedad" class="responsive-icon">
+            </div>
+            <p>Antofagasta, Chile</p>
+        </div>
     </div>
+    
+    <div class="container">
         <h2>Monitoreo de Humedad para Riego</h2>
         <p>Verifica si las condiciones actuales son adecuadas para regar</p>
         
